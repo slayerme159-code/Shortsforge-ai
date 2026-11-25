@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ShortsForge AI — Shorts Generator</title>
+<style>
+:root{color-scheme:dark;--bg:#090d18;--panel:#121a2b;--line:#26334b;--muted:#9ba9c2;--blue:#6d8cff;--cyan:#5ce1e6}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 15% 0%,#1a2850 0,transparent 40%),var(--bg);color:#f5f7ff;font:15px/1.5 Inter,system-ui,Arial,sans-serif}
+main{max-width:1180px;margin:auto;padding:28px 18px 60px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:24px}.brand{font-weight:850;font-size:21px;letter-spacing:-.6px}.brand span{color:var(--cyan)}.pill{border:1px solid #31516a;border-radius:30px;padding:5px 10px;color:#9be7e9;font-size:12px}
+h1{font-size:clamp(28px,5vw,46px);line-height:1.08;letter-spacing:-1.5px;margin:8px 0 10px}.sub{color:var(--muted);max-width:700px;margin:0 0 24px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 370px;gap:18px}.panel{background:linear-gradient(180deg,#151f33,#101827);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 12px 40px #0003}.panel h2{font-size:16px;margin:0 0 14px}
+label{display:block;color:#c8d2e6;font-size:13px;margin:13px 0 6px}input,select,textarea{width:100%;background:#0b1220;border:1px solid #2b3952;color:#f5f7ff;border-radius:10px;padding:11px 12px;font:inherit;outline:none}input:focus,select:focus,textarea:focus{border-color:var(--blue)}textarea{min-height:80px;resize:vertical}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button{border:0;border-radius:11px;padding:12px 15px;background:linear-gradient(100deg,#617cff,#7865f7);color:white;font-weight:750;font-size:14px;cursor:pointer}button:disabled{opacity:.45;cursor:wait}.secondary{background:#202c42;border:1px solid #35435d}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}.actions button{flex:1}
+#status{color:var(--muted);font-size:13px;min-height:22px;margin-top:10px}.previewWrap{display:flex;justify-content:center;background:#080c15;border:1px solid #29354c;border-radius:14px;padding:12px}
+canvas{width:min(100%,270px);aspect-ratio:9/16;height:auto;border-radius:9px;background:#101b31}
+.small{font-size:12px;color:var(--muted)}.step{display:flex;gap:10px;align-items:center;margin:12px 0;color:#c7d2e8;font-size:13px}.dot{width:8px;height:8px;border-radius:50%;background:#35445f}.dot.on{background:var(--cyan);box-shadow:0 0 12px var(--cyan)}
+#script{min-height:160px}.notice{border:1px solid #66542d;background:#2b2415;color:#f1d99c;padding:11px;border-radius:10px;font-size:12px;margin-top:14px}
+footer{color:#71809b;font-size:12px;margin-top:22px}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.top{align-items:flex-start}.right{order:-1}.previewWrap canvas{width:min(65vw,270px)}}@media(max-width:520px){main{padding:18px 12px 40px}.row{grid-template-columns:1fr}.panel{padding:14px}.actions{flex-direction:column}}
+</style>
+</head>
+<body>
+<main>
+ <div class="top"><div class="brand">✦ Shorts<span>Forge</span> AI</div><div class="pill">MOBILE + DESKTOP WEB APP</div></div>
+ <h1>Turn a topic into a<br><span style="color:#8da4ff">scroll-stopping Short.</span></h1>
+ <p class="sub">Generate a topic and script with Gemini, create an AI voiceover with ElevenLabs, then render animated motion graphics with burned-in captions.</p>
+ <div class="layout">
+  <section class="panel">
+   <h2>① Connect your AI services</h2>
+   <label>Google Gemini API key <span class="small">(for topic + script)</span></label>
+   <input id="geminiKey" type="password" placeholder="Paste Gemini API key" autocomplete="off">
+   <label>ElevenLabs API key <span class="small">(for voiceover)</span></label>
+   <input id="elevenKey" type="password" placeholder="Paste ElevenLabs API key" autocomplete="off">
+   <div class="row">
+    <div><label>Video length</label><select id="duration"><option value="25">25 seconds</option><option value="35" selected>35 seconds</option><option value="45">45 seconds</option><option value="55">55 seconds</option></select></div>
+    <div><label>Content category</label><select id="category"><option>Surprising facts</option><option>Science and technology</option><option>History mysteries</option><option>Psychology</option><option>Animals and nature</option><option>Business and money</option><option>Space</option><option>AI and future</option><option>Random viral topic</option></select></div>
+   </div>
+   <label>Optional channel niche / audience</label><input id="niche" placeholder="e.g. curious facts for a general audience">
+   <div class="actions"><button id="generate">✦ Generate a Short</button><button class="secondary" id="demo">Try demo</button></div>
+   <div id="status" role="status">Ready. Add your API keys to generate a new AI short.</div>
+   <div class="notice">API keys are used directly by this browser and are not sent to a ShortsForge server. Do not use this on a shared/public device. Gemini selects an engaging topic; true live trend rankings require a separate trends data provider.</div>
+   <h2 style="margin-top:22px">② Script and captions</h2>
+   <label>Generated title</label><input id="title" placeholder="Your short's title">
+   <label>Voiceover script (editable)</label><textarea id="script" placeholder="Your generated narration will appear here..."></textarea>
+   <div class="actions"><button class="secondary" id="voice">Generate voiceover</button><button class="secondary" id="render">Render video</button></div>
+   <p class="small">After generating the voice, render the video. The MP4-style export is a browser-recorded WebM file; convert it to MP4 with the instructions in README.</p>
+  </section>
+  <aside class="panel right">
+   <h2>Live vertical preview</h2>
+   <div class="previewWrap"><canvas id="canvas" width="540" height="960"></canvas></div>
+   <div class="step"><span class="dot on" id="d1"></span> Topic and script</div>
+   <div class="step"><span class="dot" id="d2"></span> AI voiceover</div>
+   <div class="step"><span class="dot" id="d3"></span> Animated video render</div>
+   <div class="actions"><button id="download" class="secondary" disabled>↓ Download video</button></div>
+   <p class="small" id="renderInfo">Your finished video will appear here.</p>
+   <audio id="audio" controls style="width:100%;margin-top:12px;display:none"></audio>
+  </aside>
+ </div>
+ <footer>ShortsForge AI is an independent starter project. Check factual claims before publishing and use music/assets you have rights to.</footer>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+let audioBlob=null, audioUrl=null, videoBlob=null, generated=null, busy=false;
+const canvas=$('canvas'),ctx=canvas.getContext('2d');
+function setStatus(s){$('status').textContent=s}
+function step(n){['d1','d2','d3'].forEach((id,i)=>$(id).classList.toggle('on',i<n))}
+function wrapText(text,max){let words=text.split(/\s+/),lines=[],line='';for(const w of words){let t=line?line+' '+w:w;if(ctx.measureText(t).width>max&&line){lines.push(line);line=w}else line=t}if(line)lines.push(line);return lines}
+function drawScene(t=0, caption='YOUR NEXT BIG IDEA', title='THE WORLD IS FULL OF SURPRISES'){
+ const w=canvas.width,h=canvas.height;
+ const g=ctx.createLinearGradient(0,0,w,h);g.addColorStop(0,'#111b39');g.addColorStop(.55,'#33245f');g.addColorStop(1,'#081a2b');ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
+ // moving glowing orbs and orbit lines
+ for(let i=0;i<8;i++){let x=w*(.12+((i*.173+t*.025)%0.8)),y=h*(.15+((i*.217+t*.012)%0.7));let r=24+(i%3)*15;let rg=ctx.createRadialGradient(x,y,1,x,y,r*2);rg.addColorStop(0,'rgba(91,225,230,.24)');rg.addColorStop(1,'rgba(91,225,230,0)');ctx.fillStyle=rg;ctx.beginPath();ctx.arc(x,y,r*2,0,Math.PI*2);ctx.fill()}
+ ctx.strokeStyle='rgba(141,164,255,.2)';ctx.lineWidth=2;for(let i=0;i<3;i++){ctx.beginPath();ctx.ellipse(w/2,h*.38,130+i*48,50+i*26,t*.08+i,0,Math.PI*2);ctx.stroke()}
+ ctx.textAlign='center';ctx.fillStyle='#5ce1e6';ctx.font='bold 22px Arial';ctx.fillText('✦ SHORTSFORGE ORIGINAL',w/2,105);
+ ctx.fillStyle='#fff';ctx.font='900 57px Arial';let tl=wrapText(title.toUpperCase(),w-90).slice(0,3);tl.forEach((l,i)=>ctx.fillText(l,w/2,245+i*68));
+ ctx.fillStyle='#aebdf4';ctx.font='bold 24px Arial';ctx.fillText('DID YOU KNOW?',w/2,500);
+ // animated central graphic
+ let pulse=1+Math.sin(t*3)*.08;ctx.save();ctx.translate(w/2,635);ctx.scale(pulse,pulse);
+ ctx.shadowColor='#5ce1e6';ctx.shadowBlur=35;ctx.fillStyle='#5ce1e6';ctx.beginPath();ctx.arc(0,0,72,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+ ctx.fillStyle='#101a35';ctx.font='bold 75px Arial';ctx.textBaseline='middle';ctx.fillText('✦',0,2);ctx.restore();
+ // caption bar
+ ctx.fillStyle='rgba(3,8,20,.82)';ctx.fillRect(28,770,w-56,126);
+ ctx.fillStyle='#fff';ctx.font='bold 36px Arial';ctx.textBaseline='middle';
+ let lines=wrapText(caption.toUpperCase(),w-100).slice(0,2);lines.forEach((l,i)=>ctx.fillText(l,w/2,815+i*43));
+ ctx.fillStyle='#5ce1e6';ctx.fillRect(28,925,(w-56)*Math.min(1,t/35),7);
+}
+drawScene();
+function parseJson(txt){let s=txt.replace(/```json|```/g,'').trim();let a=s.indexOf('{'),b=s.lastIndexOf('}');return JSON.parse(s.slice(a,b+1))}
+async function generate(){
+ if(busy)return;const key=$('geminiKey').value.trim();if(!key){setStatus('Add your Gemini API key first, or use Try demo.');return}
+ busy=true;$('generate').disabled=true;setStatus('Asking Gemini to choose a topic and write a punchy script…');
+ try{
+  const dur=$('duration').value,cat=$('category').value,niche=$('niche').value||'general audience';
+  const prompt=`You are a short-form video writer. Choose ONE highly engaging, surprising, factual topic suitable for a ${dur}-second vertical short. Category: ${cat}. Audience/niche: ${niche}. Aim for a strong 2-second hook, curiosity gaps, clear simple language, and a satisfying ending. Avoid fabricated statistics, dangerous instructions, medical/financial advice, and unverifiable claims. Return ONLY valid JSON: {"title":"short title","topic":"topic","script":"spoken narration, 65-115 words depending on duration","captions":["caption phrase 1","caption phrase 2","..."],"visual_keywords":["visual idea 1","visual idea 2","visual idea 3"]}. Captions should be 5-9 words each and follow the narration in order.`;
+  const res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+encodeURIComponent(key),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:1.1,responseMimeType:'application/json'}})});
+  if(!res.ok)throw new Error('Gemini API error '+res.status+': '+(await res.text()).slice(0,250));
+  const data=await res.json(),raw=data.candidates?.[0]?.content?.parts?.map(p=>p.text||'').join('')||'';
+  generated=parseJson(raw);$('title').value=generated.title||'';$('script').value=generated.script||'';
+  drawScene(0,'YOUR SHORT IS READY',generated.title||'A SURPRISING FACT');step(1);setStatus('Topic and script generated. Review the facts, then create the voiceover.'); 
+ }catch(e){setStatus('Could not generate: '+e.message)}
+ finally{busy=false;$('generate').disabled=false}
+}
+function demo(){
+ generated={title:'Why Do We Get Déjà Vu?',topic:'déjà vu',script:'Have you ever walked into a place and felt like you have already lived that exact moment? That strange feeling is called déjà vu. One explanation is that your brain briefly processes a familiar-looking moment in an unusual way, making it feel like a memory. It is not proof that you can see the future. It is a reminder that memory is a surprisingly complex process. Next time it happens, your brain may simply be playing a trick on your sense of familiarity.',captions:['HAVE YOU EVER FELT THIS?','A MOMENT THAT FEELS FAMILIAR','IT IS CALLED DÉJÀ VU','YOUR BRAIN MAY BE MIXING SIGNALS','IT IS NOT A GLIMPSE OF THE FUTURE','MEMORY IS MORE COMPLEX THAN YOU THINK']};
+ $('title').value=generated.title;$('script').value=generated.script;drawScene(0,'HAVE YOU EVER FELT THIS?',generated.title);step(1);setStatus('Demo script loaded. Add your ElevenLabs key for a real voiceover.');}
+async function makeVoice(){
+ if(busy)return;const key=$('elevenKey').value.trim(),script=$('script').value.trim();if(!script){setStatus('Generate a script or type one before creating voiceover.');return}if(!key){setStatus('Add your ElevenLabs API key to create an AI voiceover.');return}
+ busy=true;$('voice').disabled=true;setStatus('Generating AI voiceover with ElevenLabs…');
+ try{
+  const voiceId='EXAVITQu4vr4xnSDxMaL'; // Sarah; replace with a voice ID from your ElevenLabs account if desired
+  const res=await fetch('https://api.elevenlabs.io/v1/text-to-speech/'+voiceId,{method:'POST',headers:{'xi-api-key':key,'Content-Type':'application/json','Accept':'audio/mpeg'},body:JSON.stringify({text:script,model_id:'eleven_multilingual_v2',voice_settings:{stability:.48,similarity_boost:.78,style:.25,use_speaker_boost:true}})});
+  if(!res.ok)throw new Error('ElevenLabs API error '+res.status+': '+(await res.text()).slice(0,220));
+  audioBlob=await res.blob();if(audioUrl)URL.revokeObjectURL(audioUrl);audioUrl=URL.createObjectURL(audioBlob);$('audio').src=audioUrl;$('audio').style.display='block';step(2);setStatus('Voiceover ready. Preview it, then render your video.');
+ }catch(e){setStatus('Voiceover failed: '+e.message)}
+ finally{busy=false;$('voice').disabled=false}
+}
+function captionsFromScript(){
+ const words=$('script').value.trim().split(/\s+/);const chunks=[];for(let i=0;i<words.length;i+=6)chunks.push(words.slice(i,i+6).join(' '));return chunks;
+}
+async function render(){
+ if(busy)return;if(!audioBlob){setStatus('Generate the AI voiceover first.');return}
+ busy=true;$('render').disabled=true;$('download').disabled=true;setStatus('Rendering animated video in your browser… keep this tab open.');
+ try{
+  const audioCtx=new (window.AudioContext||window.webkitAudioContext)();await audioCtx.resume();
+  const decoded=await audioCtx.decodeAudioData(await audioBlob.arrayBuffer());
+  const source=audioCtx.createBufferSource();source.buffer=decoded;
+  const dest=audioCtx.createMediaStreamDestination();source.connect(dest);
+  const stream=canvas.captureStream(30);dest.stream.getAudioTracks().forEach(t=>stream.addTrack(t));
+  const mime=MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')?'video/webm;codecs=vp9,opus':'video/webm';
+  const recorder=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:4500000});const chunks=[];
+  recorder.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
+  const duration=decoded.duration;let start=performance.now();let raf;
+  const caps=captionsFromScript();recorder.start(250);source.start();
+  function frame(now){let elapsed=(now-start)/1000;let idx=Math.min(caps.length-1,Math.floor(elapsed/Math.max(.1,duration/caps.length)));drawScene(elapsed,caps[idx]||'FOLLOW FOR MORE', $('title').value||'A SURPRISING STORY');if(elapsed<duration+.15)raf=requestAnimationFrame(frame);else{cancelAnimationFrame(raf);if(recorder.state==='recording')recorder.stop()}}
+  recorder.onstop=()=>{videoBlob=new Blob(chunks,{type:'video/webm'});$('download').disabled=false;$('renderInfo').textContent=`Rendered ${duration.toFixed(1)} seconds · WebM · ${(videoBlob.size/1024/1024).toFixed(1)} MB`;step(3);setStatus('Video rendered! Download it below.');audioCtx.close();busy=false;$('render').disabled=false};
+  requestAnimationFrame(frame);
+ }catch(e){setStatus('Render failed: '+e.message);busy=false;$('render').disabled=false}
+}
+$('generate').onclick=generate;$('demo').onclick=demo;$('voice').onclick=makeVoice;$('render').onclick=render;
+$('download').onclick=()=>{if(!videoBlob)return;const a=document.createElement('a');a.href=URL.createObjectURL(videoBlob);a.download='shortsforge-video.webm';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),30000)};
+$('title').addEventListener('input',()=>drawScene(0,'YOUR CAPTION HERE',$('title').value||'YOUR NEXT SHORT'));
+</script>
+</body></html>
